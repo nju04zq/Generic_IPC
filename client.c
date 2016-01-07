@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/types.h>
 #include "util.h"
 #include "generic_ipc.h"
 
@@ -12,7 +13,22 @@
 static void
 client_hander (ipc_req_t *req_p, ipc_resp_t *resp_p)
 {
-    // Dummy one, server won't send msg in our case
+    pid_t pid;
+
+    if (req_p->req_data) {
+        pid = *(pid_t *)req_p->req_data;
+        printf("##Server PID %d\n", pid);
+    }
+
+    pid = getpid();
+
+    resp_p->resp_data = calloc(1, sizeof(pid_t));
+    if (!resp_p->resp_data) {
+        return;
+    }
+
+    memcpy(resp_p->resp_data, &pid, sizeof(pid_t));
+    resp_p->resp_data_size = sizeof(pid_t);
     return;
 }
 
